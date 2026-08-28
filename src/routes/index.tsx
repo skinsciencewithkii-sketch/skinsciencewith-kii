@@ -36,12 +36,13 @@ function GuidePage() {
   const [state, setState] = useState<"checking" | "locked" | "unlocked">("checking");
   const [paidHtml, setPaidHtml] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
-  const [justUnlocked, setJustUnlocked] = useState(false);
+  const coverRef = useRef<HTMLDivElement>(null);
+  const [slot, setSlot] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setPending(params.get("pending") === "1");
-    setJustUnlocked(params.get("welcome") === "1");
+    setSlot(coverRef.current?.querySelector<HTMLElement>("#kii-pay-slot") ?? null);
     void loadAccess();
   }, []);
 
@@ -65,29 +66,26 @@ function GuidePage() {
     }
   }
 
+  const card =
+    state === "unlocked" ? (
+      <div className="payment-gate">
+        <div className="pay-kicker">skin science with kii</div>
+        <p className="pay-title">You're in. Let's understand your acne.</p>
+        <p className="pay-copy">Your full guide is just below.</p>
+      </div>
+    ) : (
+      <PaymentCard checking={state === "checking"} pending={pending} onRestored={loadAccess} />
+    );
+
   return (
     <>
-      <section className="page">
-        <div dangerouslySetInnerHTML={{ __html: coverTop }} />
-
-        {state === "unlocked" ? (
-          <div className="payment-gate">
-            <div className="pay-kicker">skin science with kii</div>
-            <p className="pay-title">You're in. Let's understand your acne.</p>
-            <p className="pay-copy">Your full guide is unlocked below.</p>
-          </div>
-        ) : (
-          <PaymentCard checking={state === "checking"} pending={pending} onRestored={loadAccess} />
-        )}
-
-        <div dangerouslySetInnerHTML={{ __html: coverBottom }} />
-      </section>
-
-      {justUnlocked && state === "unlocked" ? null : null}
+      <div ref={coverRef} dangerouslySetInnerHTML={{ __html: COVER_HTML }} />
+      {slot ? createPortal(card, slot) : null}
       {paidHtml ? <div dangerouslySetInnerHTML={{ __html: paidHtml }} /> : null}
     </>
   );
 }
+
 
 function PaymentCard({
   checking,
