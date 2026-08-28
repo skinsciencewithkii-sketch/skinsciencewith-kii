@@ -33,7 +33,6 @@ export const Route = createFileRoute("/")({
 });
 
 function GuidePage() {
-  console.log("KII render");
   const [state, setState] = useState<"checking" | "locked" | "unlocked">("checking");
   const [paidHtml, setPaidHtml] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -43,9 +42,19 @@ function GuidePage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setPending(params.get("pending") === "1");
-    setSlot(coverRef.current?.querySelector<HTMLElement>("#kii-pay-slot") ?? null);
-    console.log("KII slot?", coverRef.current, coverRef.current?.querySelector("#kii-pay-slot"));
     void loadAccess();
+  }, []);
+
+  // The cover markup is injected as HTML; keep the portal target in sync in
+  // case React re-creates that subtree.
+  useEffect(() => {
+    const find = () => {
+      const node = document.getElementById("kii-pay-slot");
+      setSlot((prev) => (prev && prev.isConnected && prev === node ? prev : node));
+    };
+    find();
+    const timer = window.setInterval(find, 400);
+    return () => window.clearInterval(timer);
   }, []);
 
   async function loadAccess() {
