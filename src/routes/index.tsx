@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
 
 import coverTop from "../../content/cover-top.html?raw";
 import coverBottom from "../../content/cover-bottom.html?raw";
