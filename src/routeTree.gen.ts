@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
+import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay/webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
   path: '/api/access/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAccessStatusRoute = ApiAccessStatusRouteImport.update({
+  id: '/api/access/status',
+  path: '/api/access/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicRazorpayWebhookRoute =
   ApiPublicRazorpayWebhookRouteImport.update({
     id: '/api/public/razorpay/webhook',
@@ -33,30 +39,47 @@ const ApiPublicRazorpayWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/access/claim' | '/api/public/razorpay/webhook'
+  fullPaths:
+    | '/'
+    | '/api/access/claim'
+    | '/api/access/status'
+    | '/api/public/razorpay/webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/access/claim' | '/api/public/razorpay/webhook'
-  id: '__root__' | '/' | '/api/access/claim' | '/api/public/razorpay/webhook'
+  to:
+    | '/'
+    | '/api/access/claim'
+    | '/api/access/status'
+    | '/api/public/razorpay/webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/access/claim'
+    | '/api/access/status'
+    | '/api/public/razorpay/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
+  ApiAccessStatusRoute: typeof ApiAccessStatusRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
@@ -76,6 +99,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAccessClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/access/status': {
+      id: '/api/access/status'
+      path: '/api/access/status'
+      fullPath: '/api/access/status'
+      preLoaderRoute: typeof ApiAccessStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/razorpay/webhook': {
       id: '/api/public/razorpay/webhook'
       path: '/api/public/razorpay/webhook'
@@ -89,6 +119,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
+  ApiAccessStatusRoute: ApiAccessStatusRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
