@@ -458,7 +458,15 @@
   .payment-gate .pay-title{font-family:var(--serif-display);font-size:27px;line-height:1.12;margin:0 0 5px;}
   .payment-gate .pay-copy{font-family:var(--serif);font-style:italic;color:var(--brown);font-size:15px;line-height:1.35;margin:0 auto 13px;max-width:95mm;}
   .payment-gate .price{font-family:var(--serif-display);font-size:25px;margin:0 0 10px;}
-  .payment-gate .pay-btn{background:var(--espresso);color:#fff;}
+  .payment-gate .pay-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    min-height:46px; padding:0 30px; border-radius:999px; border:none;
+    background:var(--espresso); color:#fff; text-decoration:none; cursor:pointer;
+    font-family:var(--sans); font-size:11px; letter-spacing:1.8px; text-transform:uppercase;
+    box-shadow:0 10px 24px rgba(62,52,45,.18); transition:transform .18s ease, opacity .18s ease;
+  }
+  .payment-gate .pay-btn:hover{ transform:translateY(-1px); opacity:.92; }
+
   .payment-gate .fine-print{font-size:9.5px;line-height:1.45;color:var(--taupe);margin:10px auto 0;max-width:100mm;}
   @media(max-width:600px){.payment-gate{width:92%;margin-top:8mm;}}
 
