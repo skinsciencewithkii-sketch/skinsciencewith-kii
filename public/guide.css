@@ -449,7 +449,7 @@
 
 
   .payment-gate{
-    width:min(132mm,100%); margin:12mm auto 0; padding:18px 20px 20px;
+    width:min(132mm,100%); margin:12mm auto 8mm; padding:18px 20px 20px;
     border:1px solid rgba(62,52,45,.16); border-radius:22px;
     background:rgba(255,255,255,.46); box-shadow:0 14px 34px rgba(62,52,45,.08);
     text-align:center;
