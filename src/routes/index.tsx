@@ -37,7 +37,7 @@ function GuidePage() {
   const [paidHtml, setPaidHtml] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const coverRef = useRef<HTMLDivElement>(null);
-  const [slot, setSlot] = useState<HTMLElement | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -45,17 +45,19 @@ function GuidePage() {
     void loadAccess();
   }, []);
 
-  // The cover markup is injected as HTML; keep the portal target in sync in
-  // case React re-creates that subtree.
+  // The cover markup is injected as HTML, so move the React-rendered payment
+  // card into its slot inside that markup.
   useEffect(() => {
-    const find = () => {
-      const node = document.getElementById("kii-pay-slot");
-      setSlot((prev) => (prev && prev.isConnected && prev === node ? prev : node));
+    const place = () => {
+      const slot = coverRef.current?.querySelector<HTMLElement>("#kii-pay-slot");
+      const node = cardRef.current;
+      if (slot && node && node.parentElement !== slot) slot.appendChild(node);
     };
-    find();
-    const timer = window.setInterval(find, 400);
+    place();
+    const timer = window.setInterval(place, 500);
     return () => window.clearInterval(timer);
   }, []);
+
 
   async function loadAccess() {
     try {
