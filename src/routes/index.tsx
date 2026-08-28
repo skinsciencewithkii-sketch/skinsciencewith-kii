@@ -43,6 +43,7 @@ function GuidePage() {
     const params = new URLSearchParams(window.location.search);
     setPending(params.get("pending") === "1");
     setSlot(coverRef.current?.querySelector<HTMLElement>("#kii-pay-slot") ?? null);
+    console.log("KII slot?", coverRef.current, coverRef.current?.querySelector("#kii-pay-slot"));
     void loadAccess();
   }, []);
 
