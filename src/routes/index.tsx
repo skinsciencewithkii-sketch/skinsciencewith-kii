@@ -33,6 +33,7 @@ export const Route = createFileRoute("/")({
 });
 
 function GuidePage() {
+  console.log("KII render");
   const [state, setState] = useState<"checking" | "locked" | "unlocked">("checking");
   const [paidHtml, setPaidHtml] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
