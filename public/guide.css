@@ -448,8 +448,6 @@
   }
 
 
-  body.paywall-locked .paid-content{display:none !important;}
-  body.paywall-unlocked .payment-gate{display:none !important;}
   .payment-gate{
     width:min(132mm,100%); margin:12mm auto 0; padding:18px 20px 20px;
     border:1px solid rgba(62,52,45,.16); border-radius:22px;
@@ -459,12 +457,8 @@
   .payment-gate .pay-kicker{font-size:9.5px;letter-spacing:2.2px;text-transform:uppercase;color:var(--brown);font-weight:700;margin-bottom:7px;}
   .payment-gate .pay-title{font-family:var(--serif-display);font-size:27px;line-height:1.12;margin:0 0 5px;}
   .payment-gate .pay-copy{font-family:var(--serif);font-style:italic;color:var(--brown);font-size:15px;line-height:1.35;margin:0 auto 13px;max-width:95mm;}
-  .payment-gate .qr-frame{width:112px;height:112px;margin:0 auto 11px;padding:7px;background:#fff;border:1px solid rgba(62,52,45,.12);border-radius:14px;box-shadow:0 8px 22px rgba(62,52,45,.09);}
-  .payment-gate .qr-frame img{width:100%;height:100%;object-fit:contain;display:block;border-radius:7px;}
   .payment-gate .price{font-family:var(--serif-display);font-size:25px;margin:0 0 10px;}
-  .payment-gate .pay-btn,.payment-gate .unlock-btn{display:inline-flex;align-items:center;justify-content:center;min-height:39px;padding:0 20px;border-radius:999px;border:1px solid var(--brown);font-family:var(--sans);font-size:10px;letter-spacing:1.3px;text-transform:uppercase;cursor:pointer;text-decoration:none;}
   .payment-gate .pay-btn{background:var(--espresso);color:#fff;}
-  .payment-gate .unlock-btn{margin-top:9px;background:transparent;color:var(--espresso);}
   .payment-gate .fine-print{font-size:9.5px;line-height:1.45;color:var(--taupe);margin:10px auto 0;max-width:100mm;}
   @media(max-width:600px){.payment-gate{width:92%;margin-top:8mm;}}
 
