@@ -92,6 +92,7 @@ function GuidePage() {
     <>
       <div ref={coverRef} dangerouslySetInnerHTML={{ __html: COVER_HTML }} />
       {slot ? createPortal(card, slot) : null}
+      <div id="kii-debug">{card}</div>
       {paidHtml ? <div dangerouslySetInnerHTML={{ __html: paidHtml }} /> : null}
     </>
   );
