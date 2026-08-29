@@ -13,7 +13,6 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
 import { Route as ApiAccessGuideRouteImport } from './routes/api/access/guide'
-import { Route as ApiAccessRestoreRouteImport } from './routes/api/access/restore'
 import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
 import { Route as ApiPayOrderRouteImport } from './routes/api/pay/order'
 import { Route as ApiPayVerifyRouteImport } from './routes/api/pay/verify'
@@ -37,11 +36,6 @@ const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
 const ApiAccessGuideRoute = ApiAccessGuideRouteImport.update({
   id: '/api/access/guide',
   path: '/api/access/guide',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAccessRestoreRoute = ApiAccessRestoreRouteImport.update({
-  id: '/api/access/restore',
-  path: '/api/access/restore',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccessStatusRoute = ApiAccessStatusRouteImport.update({
@@ -71,7 +65,6 @@ export interface FileRoutesByFullPath {
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
-  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/pay/order': typeof ApiPayOrderRoute
   '/api/pay/verify': typeof ApiPayVerifyRoute
@@ -82,7 +75,6 @@ export interface FileRoutesByTo {
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
-  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/pay/order': typeof ApiPayOrderRoute
   '/api/pay/verify': typeof ApiPayVerifyRoute
@@ -94,7 +86,6 @@ export interface FileRoutesById {
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
-  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/pay/order': typeof ApiPayOrderRoute
   '/api/pay/verify': typeof ApiPayVerifyRoute
@@ -107,7 +98,6 @@ export interface FileRouteTypes {
     | '/guide'
     | '/api/access/claim'
     | '/api/access/guide'
-    | '/api/access/restore'
     | '/api/access/status'
     | '/api/pay/order'
     | '/api/pay/verify'
@@ -118,7 +108,6 @@ export interface FileRouteTypes {
     | '/guide'
     | '/api/access/claim'
     | '/api/access/guide'
-    | '/api/access/restore'
     | '/api/access/status'
     | '/api/pay/order'
     | '/api/pay/verify'
@@ -129,7 +118,6 @@ export interface FileRouteTypes {
     | '/guide'
     | '/api/access/claim'
     | '/api/access/guide'
-    | '/api/access/restore'
     | '/api/access/status'
     | '/api/pay/order'
     | '/api/pay/verify'
@@ -141,7 +129,6 @@ export interface RootRouteChildren {
   GuideRoute: typeof GuideRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
   ApiAccessGuideRoute: typeof ApiAccessGuideRoute
-  ApiAccessRestoreRoute: typeof ApiAccessRestoreRoute
   ApiAccessStatusRoute: typeof ApiAccessStatusRoute
   ApiPayOrderRoute: typeof ApiPayOrderRoute
   ApiPayVerifyRoute: typeof ApiPayVerifyRoute
@@ -176,13 +163,6 @@ declare module '@tanstack/react-router' {
       path: '/api/access/guide'
       fullPath: '/api/access/guide'
       preLoaderRoute: typeof ApiAccessGuideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/access/restore': {
-      id: '/api/access/restore'
-      path: '/api/access/restore'
-      fullPath: '/api/access/restore'
-      preLoaderRoute: typeof ApiAccessRestoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/access/status': {
@@ -221,7 +201,6 @@ const rootRouteChildren: RootRouteChildren = {
   GuideRoute: GuideRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
   ApiAccessGuideRoute: ApiAccessGuideRoute,
-  ApiAccessRestoreRoute: ApiAccessRestoreRoute,
   ApiAccessStatusRoute: ApiAccessStatusRoute,
   ApiPayOrderRoute: ApiPayOrderRoute,
   ApiPayVerifyRoute: ApiPayVerifyRoute,

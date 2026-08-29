@@ -41,7 +41,7 @@ function GuidePage() {
         if (cancelled) return;
         if (!response.ok) {
           setStatus("denied");
-          void navigate({ to: "/", search: { locked: "1" } as never });
+          void navigate({ to: "/" });
           return;
         }
         setHtml(await response.text());
