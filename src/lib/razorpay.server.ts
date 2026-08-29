@@ -10,8 +10,10 @@ const RAZORPAY_API = "https://api.razorpay.com/v1";
 export class RazorpayConfigError extends Error {}
 
 function credentials(): { keyId: string; keySecret: string } {
-  const keyId = process.env["RAZORPAY_KEY_ID"];
-  const keySecret = process.env["RAZORPAY_KEY_SECRET"];
+  // Read at call time (per-request env injection) and trim stray whitespace,
+  // which would otherwise silently break Basic authentication.
+  const keyId = process.env["RAZORPAY_KEY_ID"]?.trim();
+  const keySecret = process.env["RAZORPAY_KEY_SECRET"]?.trim();
   if (!keyId || !keySecret) {
     throw new RazorpayConfigError(
       "Razorpay is not configured: RAZORPAY_KEY_ID and/or RAZORPAY_KEY_SECRET are missing",
@@ -19,6 +21,7 @@ function credentials(): { keyId: string; keySecret: string } {
   }
   return { keyId, keySecret };
 }
+
 
 /** Public key id, safe to send to the browser (never the secret). */
 export function publicKeyId(): string {
