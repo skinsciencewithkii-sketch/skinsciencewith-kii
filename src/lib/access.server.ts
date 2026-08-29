@@ -3,7 +3,7 @@
 import { createHmac, timingSafeEqual } from "crypto";
 
 export const ACCESS_COOKIE = "kii_guide_access";
-export const PAYMENT_LINK_ID = "plink_TVG4aXI7umB4mf";
+
 export const EXPECTED_AMOUNT_PAISE = 39900;
 
 function secret(): string {
@@ -64,29 +64,3 @@ export async function purchaseExists(paymentId: string): Promise<boolean> {
   return Boolean(data);
 }
 
-/** Looks up a verified purchase by the email or phone used at checkout. */
-export async function findPurchaseByIdentifier(identifier: string): Promise<string | null> {
-  const value = identifier.trim();
-  if (!value) return null;
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const digits = value.replace(/\D/g, "");
-
-  const byEmail = await supabaseAdmin
-    .from("purchases")
-    .select("razorpay_payment_id")
-    .ilike("email", value)
-    .limit(1)
-    .maybeSingle();
-  if (byEmail.data) return byEmail.data.razorpay_payment_id;
-
-  if (digits.length >= 10) {
-    const byPhone = await supabaseAdmin
-      .from("purchases")
-      .select("razorpay_payment_id")
-      .or(`contact.eq.${digits},contact.eq.+${digits},contact.eq.+91${digits.slice(-10)}`)
-      .limit(1)
-      .maybeSingle();
-    if (byPhone.data) return byPhone.data.razorpay_payment_id;
-  }
-  return null;
-}
