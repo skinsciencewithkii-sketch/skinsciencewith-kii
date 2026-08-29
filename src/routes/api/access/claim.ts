@@ -12,8 +12,34 @@ export const Route = createFileRoute("/api/access/claim")({
         const url = new URL(request.url);
         const paymentId = url.searchParams.get("razorpay_payment_id");
 
+        if (url.searchParams.get("check") === "1") {
+          if (!paymentId || !/^pay_[A-Za-z0-9]{6,64}$/.test(paymentId)) {
+            return Response.json(
+              { hasAccess: false },
+              { status: 400, headers: { "cache-control": "no-store" } },
+            );
+          }
+
+          if (!(await purchaseExists(paymentId))) {
+            return Response.json(
+              { hasAccess: false },
+              { status: 202, headers: { "cache-control": "no-store" } },
+            );
+          }
+
+          return Response.json(
+            { hasAccess: true },
+            {
+              headers: {
+                "cache-control": "no-store",
+                "Set-Cookie": accessCookieHeader(paymentId),
+              },
+            },
+          );
+        }
+
         if (paymentId) {
-          for (let attempt = 0; attempt < 4; attempt++) {
+          for (let attempt = 0; attempt < 10; attempt++) {
             if (await purchaseExists(paymentId)) {
               return new Response(null, {
                 status: 302,
@@ -23,11 +49,17 @@ export const Route = createFileRoute("/api/access/claim")({
                 },
               });
             }
-            await new Promise((resolve) => setTimeout(resolve, 900));
+            await new Promise((resolve) => setTimeout(resolve, 1_000));
           }
         }
 
-        return new Response(null, { status: 302, headers: { Location: "/?pending=1" } });
+        const pendingLocation = paymentId
+          ? `/?pending=1&payment_id=${encodeURIComponent(paymentId)}`
+          : "/?pending=1";
+        return new Response(null, {
+          status: 302,
+          headers: { Location: pendingLocation, "cache-control": "no-store" },
+        });
       },
     },
   },
