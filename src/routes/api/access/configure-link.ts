@@ -2,9 +2,19 @@ import { createFileRoute } from "@tanstack/react-router";
 import { timingSafeEqual } from "crypto";
 
 import { PAYMENT_LINK_ID } from "@/lib/access.server";
-import { updatePaymentLinkCallback } from "@/lib/razorpay.server";
+import { fetchPaymentLink, updatePaymentLinkCallback } from "@/lib/razorpay.server";
 
 const CALLBACK_URL = "https://skinsciencewithkii.netlify.app/api/access/claim";
+
+function isAuthorized(request: Request): boolean {
+  const secret = process.env["GUIDE_ACCESS_SECRET"]?.trim();
+  const provided = request.headers.get("x-setup-secret")?.trim() ?? "";
+  return Boolean(
+    secret &&
+      provided.length === secret.length &&
+      timingSafeEqual(Buffer.from(provided), Buffer.from(secret)),
+  );
+}
 
 /**
  * One-off maintenance endpoint: points the EXISTING Razorpay Payment Link at
@@ -16,14 +26,35 @@ const CALLBACK_URL = "https://skinsciencewithkii.netlify.app/api/access/claim";
 export const Route = createFileRoute("/api/access/configure-link")({
   server: {
     handlers: {
+      GET: async ({ request }) => {
+        if (!isAuthorized(request)) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+
+        try {
+          const link = await fetchPaymentLink(PAYMENT_LINK_ID);
+          if (!link) {
+            return Response.json({ found: false }, { status: 502 });
+          }
+          return Response.json({
+            found: true,
+            id: link.id,
+            short_url: link.short_url,
+            status: link.status,
+            amountPaise: link.amount,
+            callback_url: link.callback_url,
+            callback_method: link.callback_method,
+          });
+        } catch (error) {
+          console.error(
+            "[access] configure-link read failed:",
+            error instanceof Error ? error.message : "unknown error",
+          );
+          return Response.json({ found: false, detail: "config_error" }, { status: 500 });
+        }
+      },
       POST: async ({ request }) => {
-        const secret = process.env["GUIDE_ACCESS_SECRET"]?.trim();
-        const provided = request.headers.get("x-setup-secret")?.trim() ?? "";
-        if (
-          !secret ||
-          provided.length !== secret.length ||
-          !timingSafeEqual(Buffer.from(provided), Buffer.from(secret))
-        ) {
+        if (!isAuthorized(request)) {
           return new Response("Unauthorized", { status: 401 });
         }
 
