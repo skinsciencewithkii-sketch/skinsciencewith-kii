@@ -8,6 +8,10 @@ const COVER_HTML = `${coverTop}<div id="kii-pay-slot"></div>${coverBottom}`;
 
 const CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
+// The existing, working ₹399 Razorpay Payment Link. Used as-is whenever
+// Checkout can't be started, so buyers always have a working payment path.
+const PAYMENT_LINK_URL = "https://rzp.io/rzp/DnSVNzC";
+
 declare global {
   interface Window {
     Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
@@ -85,12 +89,46 @@ function GuidePage() {
       setError("That guide link is locked. Complete your ₹399 purchase to open it.");
     }
 
+    // Returning from the Razorpay Payment Link: the redirect alone proves
+    // nothing, so poll the server until the verified webhook has landed.
+    const pendingPaymentId = params.get("payment_id");
+    if (params.get("pending") === "1" && pendingPaymentId) {
+      setError("Confirming your payment with Razorpay… this can take a few seconds.");
+      void (async () => {
+        for (let attempt = 0; attempt < 45 && !cancelled; attempt++) {
+          try {
+            const response = await fetch(
+              `/api/access/claim?check=1&razorpay_payment_id=${encodeURIComponent(pendingPaymentId)}`,
+              { credentials: "same-origin", cache: "no-store" },
+            );
+            const data = (await response.json()) as { hasAccess?: boolean };
+            if (data.hasAccess) {
+              if (!cancelled) {
+                setState("unlocked");
+                setError(null);
+                void navigate({ to: "/guide" });
+              }
+              return;
+            }
+          } catch {
+            /* keep polling */
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2_000));
+        }
+        if (!cancelled) {
+          setError(
+            "We haven't received confirmation for that payment yet. Refresh in a minute, or contact us and we'll open your guide.",
+          );
+        }
+      })();
+    }
+
     void check();
     void loadCheckoutScript();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   // The cover markup is injected as HTML, so move the React-rendered payment
   // card into its slot inside that markup.
@@ -123,12 +161,9 @@ function GuidePage() {
         cache: "no-store",
       });
       if (!orderResponse.ok) {
-        setError(
-          orderResponse.status === 503
-            ? "Payments are temporarily unavailable. Please try again shortly."
-            : "We couldn't start the payment just now. Please try again in a moment.",
-        );
-        setBusy(false);
+        // Fall back to the existing, working Payment Link. Access is still
+        // granted only after the verified payment_link.paid webhook.
+        window.location.href = PAYMENT_LINK_URL;
         return;
       }
 
