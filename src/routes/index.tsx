@@ -128,7 +128,7 @@ function GuidePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   // The cover markup is injected as HTML, so move the React-rendered payment
   // card into its slot inside that markup.
