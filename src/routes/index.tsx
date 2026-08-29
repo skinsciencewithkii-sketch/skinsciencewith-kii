@@ -40,8 +40,47 @@ function GuidePage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setPending(params.get("pending") === "1");
-    void loadAccess();
+    const isPending = params.get("pending") === "1";
+    const paymentId = params.get("payment_id");
+    setPending(isPending);
+
+    let cancelled = false;
+    const wait = (milliseconds: number) =>
+      new Promise((resolve) => window.setTimeout(resolve, milliseconds));
+
+    const checkAccess = async () => {
+      await loadAccess();
+      if (!isPending || !paymentId || !/^pay_[A-Za-z0-9]{6,64}$/.test(paymentId)) return;
+
+      // Razorpay's browser redirect can beat its verified webhook. Keep the
+      // payment id only long enough to wait for the server-recorded purchase;
+      // the id alone never grants access.
+      for (let attempt = 0; attempt < 45 && !cancelled; attempt++) {
+        try {
+          const response = await fetch(
+            `/api/access/claim?check=1&razorpay_payment_id=${encodeURIComponent(paymentId)}`,
+            { credentials: "same-origin", cache: "no-store" },
+          );
+          if (response.ok) {
+            const result = (await response.json()) as { hasAccess: boolean };
+            if (result.hasAccess) {
+              window.history.replaceState({}, "", "/?welcome=1");
+              setPending(false);
+              await loadAccess();
+              return;
+            }
+          }
+        } catch {
+          // A transient network failure should not stop payment confirmation.
+        }
+        await wait(2_000);
+      }
+    };
+
+    void checkAccess();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // The cover markup is injected as HTML, so move the React-rendered payment

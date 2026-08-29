@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_grants: {
+        Row: {
+          created_at: string
+          id: string
+          razorpay_payment_id: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          razorpay_payment_id: string
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          razorpay_payment_id?: string
+          source?: string
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           amount: number
