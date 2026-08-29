@@ -70,7 +70,7 @@ function GuidePage() {
   useEffect(() => {
     let cancelled = false;
 
-    const check = async () => {
+    const check = async (autoOpen = false) => {
       try {
         const response = await fetch("/api/access/status", {
           credentials: "same-origin",
@@ -79,6 +79,7 @@ function GuidePage() {
         const data = (await response.json()) as { hasAccess: boolean };
         if (cancelled) return;
         setState(data.hasAccess ? "unlocked" : "locked");
+        if (data.hasAccess && autoOpen) void navigate({ to: "/guide" });
       } catch {
         if (!cancelled) setState("locked");
       }
@@ -123,7 +124,7 @@ function GuidePage() {
       })();
     }
 
-    void check();
+    void check(params.get("welcome") === "1");
     void loadCheckoutScript();
     return () => {
       cancelled = true;
