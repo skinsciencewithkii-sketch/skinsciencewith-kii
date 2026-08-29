@@ -86,7 +86,7 @@ function GuidePage() {
         <p className="pay-copy">Your full guide is just below.</p>
       </div>
     ) : (
-      <PaymentCard checking={state === "checking"} pending={pending} onRestored={loadAccess} />
+      <PaymentCard checking={state === "checking"} pending={pending} />
     );
 
   return (
@@ -102,44 +102,7 @@ function GuidePage() {
 }
 
 
-function PaymentCard({
-  checking,
-  pending,
-  onRestored,
-}: {
-  checking: boolean;
-  pending: boolean;
-  onRestored: () => Promise<void>;
-}) {
-  const [showRestore, setShowRestore] = useState(false);
-  const [identifier, setIdentifier] = useState("");
-  const [message, setMessage] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  async function restore(event: React.FormEvent) {
-    event.preventDefault();
-    setBusy(true);
-    setMessage(null);
-    try {
-      const res = await fetch("/api/access/restore", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        credentials: "same-origin",
-        body: JSON.stringify({ identifier }),
-      });
-      const data = (await res.json()) as { hasAccess: boolean };
-      if (data.hasAccess) {
-        await onRestored();
-      } else {
-        setMessage("We couldn't find an order with those details yet.");
-      }
-    } catch {
-      setMessage("Something went wrong. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
+function PaymentCard({ checking, pending }: { checking: boolean; pending: boolean }) {
   return (
     <div className="payment-gate">
       <div className="pay-kicker">skin science with kii</div>
@@ -157,27 +120,6 @@ function PaymentCard({
       ) : null}
 
       {checking ? <p className="fine-print">One moment…</p> : null}
-
-      {showRestore ? (
-        <form className="restore-form" onSubmit={restore}>
-          <input
-            className="restore-input"
-            type="text"
-            value={identifier}
-            onChange={(event) => setIdentifier(event.target.value)}
-            placeholder="Email or phone used at checkout"
-            aria-label="Email or phone used at checkout"
-          />
-          <button className="restore-submit" type="submit" disabled={busy}>
-            {busy ? "Checking…" : "Continue"}
-          </button>
-          {message ? <p className="fine-print">{message}</p> : null}
-        </form>
-      ) : (
-        <button className="restore-link" type="button" onClick={() => setShowRestore(true)}>
-          Already purchased?
-        </button>
-      )}
     </div>
   );
 }
