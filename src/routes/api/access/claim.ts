@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import {
   EXPECTED_AMOUNT_PAISE,
+  PAYMENT_LINK_ID,
   accessCookieHeader,
   purchaseExists,
 } from "@/lib/access.server";
@@ -20,6 +21,8 @@ async function verifyViaCallback(url: URL, paymentId: string): Promise<boolean> 
   const signature = url.searchParams.get("razorpay_signature");
   const referenceId = url.searchParams.get("razorpay_payment_link_reference_id") ?? "";
   if (!linkId || !status || !signature) return false;
+  // Only the one existing ₹399 Payment Link may grant access.
+  if (linkId !== PAYMENT_LINK_ID) return false;
 
   try {
     if (
