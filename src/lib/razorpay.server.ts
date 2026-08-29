@@ -148,3 +148,24 @@ export async function fetchPayment(paymentId: string): Promise<RazorpayPayment |
     contact: body.contact ? String(body.contact) : null,
   };
 }
+
+/**
+ * HMAC check of a Payment Link callback:
+ * `payment_link_id|payment_link_reference_id|payment_link_status|payment_id`.
+ * This lets a buyer be verified server-side even if the webhook is delayed.
+ */
+export function verifyPaymentLinkSignature(params: {
+  paymentLinkId: string;
+  referenceId: string;
+  status: string;
+  paymentId: string;
+  signature: string;
+}): boolean {
+  const { keySecret } = credentials();
+  const expected = createHmac("sha256", keySecret)
+    .update(
+      `${params.paymentLinkId}|${params.referenceId}|${params.status}|${params.paymentId}`,
+    )
+    .digest("hex");
+  return safeEqual(params.signature, expected);
+}
