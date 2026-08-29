@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
+import { Route as ApiAccessConfigureLinkRouteImport } from './routes/api/access/configure-link'
 import { Route as ApiAccessGuideRouteImport } from './routes/api/access/guide'
 import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
 import { Route as ApiPaymentOrderRouteImport } from './routes/api/payment/order'
@@ -31,6 +32,11 @@ const GuideRoute = GuideRouteImport.update({
 const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
   id: '/api/access/claim',
   path: '/api/access/claim',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAccessConfigureLinkRoute = ApiAccessConfigureLinkRouteImport.update({
+  id: '/api/access/configure-link',
+  path: '/api/access/configure-link',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccessGuideRoute = ApiAccessGuideRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/payment/order': typeof ApiPaymentOrderRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/payment/order': typeof ApiPaymentOrderRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
+  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/payment/order': typeof ApiPaymentOrderRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/'
     | '/guide'
     | '/api/access/claim'
+    | '/api/access/configure-link'
     | '/api/access/guide'
     | '/api/access/status'
     | '/api/payment/order'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/'
     | '/guide'
     | '/api/access/claim'
+    | '/api/access/configure-link'
     | '/api/access/guide'
     | '/api/access/status'
     | '/api/payment/order'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/'
     | '/guide'
     | '/api/access/claim'
+    | '/api/access/configure-link'
     | '/api/access/guide'
     | '/api/access/status'
     | '/api/payment/order'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuideRoute: typeof GuideRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
+  ApiAccessConfigureLinkRoute: typeof ApiAccessConfigureLinkRoute
   ApiAccessGuideRoute: typeof ApiAccessGuideRoute
   ApiAccessStatusRoute: typeof ApiAccessStatusRoute
   ApiPaymentOrderRoute: typeof ApiPaymentOrderRoute
@@ -156,6 +169,13 @@ declare module '@tanstack/react-router' {
       path: '/api/access/claim'
       fullPath: '/api/access/claim'
       preLoaderRoute: typeof ApiAccessClaimRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/access/configure-link': {
+      id: '/api/access/configure-link'
+      path: '/api/access/configure-link'
+      fullPath: '/api/access/configure-link'
+      preLoaderRoute: typeof ApiAccessConfigureLinkRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/access/guide': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuideRoute: GuideRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
+  ApiAccessConfigureLinkRoute: ApiAccessConfigureLinkRoute,
   ApiAccessGuideRoute: ApiAccessGuideRoute,
   ApiAccessStatusRoute: ApiAccessStatusRoute,
   ApiPaymentOrderRoute: ApiPaymentOrderRoute,

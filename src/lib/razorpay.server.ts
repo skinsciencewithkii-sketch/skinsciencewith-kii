@@ -114,6 +114,39 @@ export function verifyCheckoutSignature(
   return safeEqual(signature, expected);
 }
 
+/**
+ * Sets callback_url / callback_method on the EXISTING payment link via the
+ * Razorpay API (PATCH /payment_links/:id). Used when the dashboard does not
+ * expose a callback field. Creates nothing new.
+ */
+export async function updatePaymentLinkCallback(
+  linkId: string,
+  callbackUrl: string,
+): Promise<{ ok: boolean; status: number; description: string }> {
+  const { ok, status, body } = await razorpayRequest(
+    `/payment_links/${encodeURIComponent(linkId)}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ callback_url: callbackUrl, callback_method: "get" }),
+    },
+  );
+
+  if (!ok) {
+    console.error(
+      `[razorpay] payment link update failed status=${status} code=${
+        body?.error?.code ?? "unknown"
+      } description=${body?.error?.description ?? "none"}`,
+    );
+    return { ok: false, status, description: body?.error?.description ?? "update_failed" };
+  }
+
+  return {
+    ok: true,
+    status,
+    description: `callback_url=${body?.callback_url ?? "unset"} callback_method=${body?.callback_method ?? "unset"}`,
+  };
+}
+
 export type RazorpayPayment = {
   id: string;
   status: string;
