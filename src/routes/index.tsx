@@ -124,7 +124,7 @@ function GuidePage() {
       })();
     }
 
-    void check();
+    void check(params.get("welcome") === "1");
     void loadCheckoutScript();
     return () => {
       cancelled = true;
