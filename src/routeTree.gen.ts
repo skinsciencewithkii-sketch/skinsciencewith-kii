@@ -10,10 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GuideRouteImport } from './routes/guide'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
-import { Route as ApiAccessConfigureLinkRouteImport } from './routes/api/access/configure-link'
 import { Route as ApiAccessGuideRouteImport } from './routes/api/access/guide'
+import { Route as ApiAccessRestoreRouteImport } from './routes/api/access/restore'
 import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay/webhook'
 
@@ -22,24 +21,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GuideRoute = GuideRouteImport.update({
-  id: '/guide',
-  path: '/guide',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
   id: '/api/access/claim',
   path: '/api/access/claim',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAccessConfigureLinkRoute = ApiAccessConfigureLinkRouteImport.update({
-  id: '/api/access/configure-link',
-  path: '/api/access/configure-link',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAccessGuideRoute = ApiAccessGuideRouteImport.update({
   id: '/api/access/guide',
   path: '/api/access/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAccessRestoreRoute = ApiAccessRestoreRouteImport.update({
+  id: '/api/access/restore',
+  path: '/api/access/restore',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccessStatusRoute = ApiAccessStatusRouteImport.update({
@@ -56,29 +50,26 @@ const ApiPublicRazorpayWebhookRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
-  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
+  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
-  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
+  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/guide': typeof GuideRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
-  '/api/access/configure-link': typeof ApiAccessConfigureLinkRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
+  '/api/access/restore': typeof ApiAccessRestoreRoute
   '/api/access/status': typeof ApiAccessStatusRoute
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
@@ -86,38 +77,34 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/guide'
     | '/api/access/claim'
-    | '/api/access/configure-link'
     | '/api/access/guide'
+    | '/api/access/restore'
     | '/api/access/status'
     | '/api/public/razorpay/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/guide'
     | '/api/access/claim'
-    | '/api/access/configure-link'
     | '/api/access/guide'
+    | '/api/access/restore'
     | '/api/access/status'
     | '/api/public/razorpay/webhook'
   id:
     | '__root__'
     | '/'
-    | '/guide'
     | '/api/access/claim'
-    | '/api/access/configure-link'
     | '/api/access/guide'
+    | '/api/access/restore'
     | '/api/access/status'
     | '/api/public/razorpay/webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  GuideRoute: typeof GuideRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
-  ApiAccessConfigureLinkRoute: typeof ApiAccessConfigureLinkRoute
   ApiAccessGuideRoute: typeof ApiAccessGuideRoute
+  ApiAccessRestoreRoute: typeof ApiAccessRestoreRoute
   ApiAccessStatusRoute: typeof ApiAccessStatusRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
@@ -131,13 +118,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/guide': {
-      id: '/guide'
-      path: '/guide'
-      fullPath: '/guide'
-      preLoaderRoute: typeof GuideRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/access/claim': {
       id: '/api/access/claim'
       path: '/api/access/claim'
@@ -145,18 +125,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAccessClaimRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/access/configure-link': {
-      id: '/api/access/configure-link'
-      path: '/api/access/configure-link'
-      fullPath: '/api/access/configure-link'
-      preLoaderRoute: typeof ApiAccessConfigureLinkRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/access/guide': {
       id: '/api/access/guide'
       path: '/api/access/guide'
       fullPath: '/api/access/guide'
       preLoaderRoute: typeof ApiAccessGuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/access/restore': {
+      id: '/api/access/restore'
+      path: '/api/access/restore'
+      fullPath: '/api/access/restore'
+      preLoaderRoute: typeof ApiAccessRestoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/access/status': {
@@ -178,10 +158,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  GuideRoute: GuideRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
-  ApiAccessConfigureLinkRoute: ApiAccessConfigureLinkRoute,
   ApiAccessGuideRoute: ApiAccessGuideRoute,
+  ApiAccessRestoreRoute: ApiAccessRestoreRoute,
   ApiAccessStatusRoute: ApiAccessStatusRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
