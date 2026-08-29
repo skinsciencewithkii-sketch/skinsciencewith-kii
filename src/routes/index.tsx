@@ -89,6 +89,40 @@ function GuidePage() {
       setError("That guide link is locked. Complete your ₹399 purchase to open it.");
     }
 
+    // Returning from the Razorpay Payment Link: the redirect alone proves
+    // nothing, so poll the server until the verified webhook has landed.
+    const pendingPaymentId = params.get("payment_id");
+    if (params.get("pending") === "1" && pendingPaymentId) {
+      setError("Confirming your payment with Razorpay… this can take a few seconds.");
+      void (async () => {
+        for (let attempt = 0; attempt < 45 && !cancelled; attempt++) {
+          try {
+            const response = await fetch(
+              `/api/access/claim?check=1&razorpay_payment_id=${encodeURIComponent(pendingPaymentId)}`,
+              { credentials: "same-origin", cache: "no-store" },
+            );
+            const data = (await response.json()) as { hasAccess?: boolean };
+            if (data.hasAccess) {
+              if (!cancelled) {
+                setState("unlocked");
+                setError(null);
+                void navigate({ to: "/guide" });
+              }
+              return;
+            }
+          } catch {
+            /* keep polling */
+          }
+          await new Promise((resolve) => setTimeout(resolve, 2_000));
+        }
+        if (!cancelled) {
+          setError(
+            "We haven't received confirmation for that payment yet. Refresh in a minute, or contact us and we'll open your guide.",
+          );
+        }
+      })();
+    }
+
     void check();
     void loadCheckoutScript();
     return () => {
