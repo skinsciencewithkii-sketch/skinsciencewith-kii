@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import coverTop from "../../content/cover-top.html?raw";
@@ -6,8 +6,13 @@ import coverBottom from "../../content/cover-bottom.html?raw";
 
 const COVER_HTML = `${coverTop}<div id="kii-pay-slot"></div>${coverBottom}`;
 
+const CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
-const PAYMENT_LINK = "https://rzp.io/rzp/DnSVNzC";
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,53 +36,57 @@ export const Route = createFileRoute("/")({
   component: GuidePage,
 });
 
+function loadCheckoutScript(): Promise<boolean> {
+  if (typeof window === "undefined") return Promise.resolve(false);
+  if (window.Razorpay) return Promise.resolve(true);
+
+  return new Promise((resolve) => {
+    const existing = document.querySelector<HTMLScriptElement>(
+      `script[src="${CHECKOUT_SCRIPT}"]`,
+    );
+    const script = existing ?? document.createElement("script");
+    script.addEventListener("load", () => resolve(Boolean(window.Razorpay)), { once: true });
+    script.addEventListener("error", () => resolve(false), { once: true });
+    if (!existing) {
+      script.src = CHECKOUT_SCRIPT;
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  });
+}
+
 function GuidePage() {
+  const navigate = useNavigate();
   const [state, setState] = useState<"checking" | "locked" | "unlocked">("checking");
-  const [paidHtml, setPaidHtml] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const isPending = params.get("pending") === "1";
-    const paymentId = params.get("payment_id");
-    setPending(isPending);
-
     let cancelled = false;
-    const wait = (milliseconds: number) =>
-      new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 
-    const checkAccess = async () => {
-      await loadAccess();
-      if (!isPending || !paymentId || !/^pay_[A-Za-z0-9]{6,64}$/.test(paymentId)) return;
-
-      // Razorpay's browser redirect can beat its verified webhook. Keep the
-      // payment id only long enough to wait for the server-recorded purchase;
-      // the id alone never grants access.
-      for (let attempt = 0; attempt < 45 && !cancelled; attempt++) {
-        try {
-          const response = await fetch(
-            `/api/access/claim?check=1&razorpay_payment_id=${encodeURIComponent(paymentId)}`,
-            { credentials: "same-origin", cache: "no-store" },
-          );
-          if (response.ok) {
-            const result = (await response.json()) as { hasAccess: boolean };
-            if (result.hasAccess) {
-              window.history.replaceState({}, "", "/?welcome=1");
-              setPending(false);
-              await loadAccess();
-              return;
-            }
-          }
-        } catch {
-          // A transient network failure should not stop payment confirmation.
-        }
-        await wait(2_000);
+    const check = async () => {
+      try {
+        const response = await fetch("/api/access/status", {
+          credentials: "same-origin",
+          cache: "no-store",
+        });
+        const data = (await response.json()) as { hasAccess: boolean };
+        if (cancelled) return;
+        setState(data.hasAccess ? "unlocked" : "locked");
+      } catch {
+        if (!cancelled) setState("locked");
       }
     };
 
-    void checkAccess();
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("locked") === "1") {
+      setError("That guide link is locked. Complete your ₹399 purchase to open it.");
+    }
+
+    void check();
+    void loadCheckoutScript();
     return () => {
       cancelled = true;
     };
@@ -96,24 +105,83 @@ function GuidePage() {
     return () => window.clearInterval(timer);
   }, []);
 
+  async function startCheckout() {
+    setError(null);
+    setBusy(true);
 
-  async function loadAccess() {
     try {
-      const res = await fetch("/api/access/status", { credentials: "same-origin" });
-      const data = (await res.json()) as { hasAccess: boolean };
-      if (!data.hasAccess) {
-        setState("locked");
+      const ready = await loadCheckoutScript();
+      if (!ready || !window.Razorpay) {
+        setError("Payment window couldn't load. Check your connection and try again.");
+        setBusy(false);
         return;
       }
-      const guide = await fetch("/api/access/guide", { credentials: "same-origin" });
-      if (!guide.ok) {
-        setState("locked");
+
+      const orderResponse = await fetch("/api/payment/order", {
+        method: "POST",
+        credentials: "same-origin",
+        cache: "no-store",
+      });
+      if (!orderResponse.ok) {
+        setError("We couldn't start the payment just now. Please try again in a moment.");
+        setBusy(false);
         return;
       }
-      setPaidHtml(await guide.text());
-      setState("unlocked");
+      const order = (await orderResponse.json()) as {
+        orderId: string;
+        amount: number;
+        currency: string;
+        keyId: string;
+      };
+
+      const checkout = new window.Razorpay({
+        key: order.keyId,
+        order_id: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        name: "Skin Science with Kii",
+        description: "The Acne Starter Guide",
+        theme: { color: "#3e342d" },
+        modal: {
+          ondismiss: () => {
+            setBusy(false);
+            setError("Payment was cancelled. You can try again whenever you're ready.");
+          },
+        },
+        handler: async (response: Record<string, string>) => {
+          try {
+            const verifyResponse = await fetch("/api/payment/verify", {
+              method: "POST",
+              credentials: "same-origin",
+              cache: "no-store",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response["razorpay_order_id"],
+                razorpay_payment_id: response["razorpay_payment_id"],
+                razorpay_signature: response["razorpay_signature"],
+              }),
+            });
+            const result = (await verifyResponse.json()) as { verified?: boolean };
+            if (!verifyResponse.ok || !result.verified) {
+              setBusy(false);
+              setError(
+                "We couldn't confirm that payment yet. If money left your account, tap the button again or contact us and we'll open your guide.",
+              );
+              return;
+            }
+            setState("unlocked");
+            void navigate({ to: "/guide" });
+          } catch {
+            setBusy(false);
+            setError("We couldn't confirm that payment. Please try again.");
+          }
+        },
+      });
+
+      checkout.open();
     } catch {
-      setState("locked");
+      setBusy(false);
+      setError("Something went wrong starting the payment. Please try again.");
     }
   }
 
@@ -122,10 +190,18 @@ function GuidePage() {
       <div className="payment-gate">
         <div className="pay-kicker">skin science with kii</div>
         <p className="pay-title">You're in. Let's understand your acne.</p>
-        <p className="pay-copy">Your full guide is just below.</p>
+        <p className="pay-copy">Your full guide is ready to read.</p>
+        <button className="pay-btn" type="button" onClick={() => void navigate({ to: "/guide" })}>
+          Open my guide
+        </button>
       </div>
     ) : (
-      <PaymentCard checking={state === "checking"} pending={pending} />
+      <PaymentCard
+        checking={state === "checking"}
+        busy={busy}
+        error={error}
+        onBuy={() => void startCheckout()}
+      />
     );
 
   return (
@@ -134,30 +210,32 @@ function GuidePage() {
       <div ref={cardRef} style={{ display: "contents" }}>
         {card}
       </div>
-      {paidHtml ? <div dangerouslySetInnerHTML={{ __html: paidHtml }} /> : null}
     </>
   );
-
 }
 
-
-function PaymentCard({ checking, pending }: { checking: boolean; pending: boolean }) {
+function PaymentCard({
+  checking,
+  busy,
+  error,
+  onBuy,
+}: {
+  checking: boolean;
+  busy: boolean;
+  error: string | null;
+  onBuy: () => void;
+}) {
   return (
     <div className="payment-gate">
       <div className="pay-kicker">skin science with kii</div>
       <p className="pay-title">Your full acne guide is waiting.</p>
       <p className="pay-copy">Unlock the complete Skin Science with Kii Acne Starter Guide.</p>
       <p className="price">₹399 • One-time payment</p>
-      <a className="pay-btn" href={PAYMENT_LINK}>
-        Unlock my guide — ₹399
-      </a>
+      <button className="pay-btn" type="button" onClick={onBuy} disabled={busy || checking}>
+        {busy ? "Opening payment…" : "Buy the Acne Guide — ₹399"}
+      </button>
 
-      {pending ? (
-        <p className="fine-print">
-          Thank you — we're confirming your order. Refresh this page in a moment.
-        </p>
-      ) : null}
-
+      {error ? <p className="fine-print">{error}</p> : null}
       {checking ? <p className="fine-print">One moment…</p> : null}
     </div>
   );
