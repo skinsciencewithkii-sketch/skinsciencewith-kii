@@ -161,12 +161,9 @@ function GuidePage() {
         cache: "no-store",
       });
       if (!orderResponse.ok) {
-        setError(
-          orderResponse.status === 503
-            ? "Payments are temporarily unavailable. Please try again shortly."
-            : "We couldn't start the payment just now. Please try again in a moment.",
-        );
-        setBusy(false);
+        // Fall back to the existing, working Payment Link. Access is still
+        // granted only after the verified payment_link.paid webhook.
+        window.location.href = PAYMENT_LINK_URL;
         return;
       }
 
