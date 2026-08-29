@@ -182,6 +182,41 @@ export async function fetchPayment(paymentId: string): Promise<RazorpayPayment |
   };
 }
 
+export type RazorpayPaymentLink = {
+  id: string;
+  short_url: string | null;
+  status: string;
+  amount: number;
+  callback_url: string | null;
+  callback_method: string | null;
+};
+
+/** Reads the current state of an existing Payment Link (diagnostics). */
+export async function fetchPaymentLink(linkId: string): Promise<RazorpayPaymentLink | null> {
+  const { ok, status, body } = await razorpayRequest(
+    `/payment_links/${encodeURIComponent(linkId)}`,
+    { method: "GET" },
+  );
+
+  if (!ok || !body?.id) {
+    console.error(
+      `[razorpay] payment link fetch failed status=${status} code=${
+        body?.error?.code ?? "unknown"
+      } description=${body?.error?.description ?? "none"}`,
+    );
+    return null;
+  }
+
+  return {
+    id: body.id,
+    short_url: body.short_url ?? null,
+    status: String(body.status ?? ""),
+    amount: Number(body.amount ?? 0),
+    callback_url: body.callback_url ?? null,
+    callback_method: body.callback_method ?? null,
+  };
+}
+
 /**
  * HMAC check of a Payment Link callback:
  * `payment_link_id|payment_link_reference_id|payment_link_status|payment_id`.
