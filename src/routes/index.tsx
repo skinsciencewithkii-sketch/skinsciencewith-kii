@@ -6,17 +6,9 @@ import coverBottom from "../../content/cover-bottom.html?raw";
 
 const COVER_HTML = `${coverTop}<div id="kii-pay-slot"></div>${coverBottom}`;
 
-const CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
-
-// The existing, working ₹399 Razorpay Payment Link. Used as-is whenever
-// Checkout can't be started, so buyers always have a working payment path.
-const PAYMENT_LINK_URL = "https://rzp.io/rzp/sVszJ7B";
-
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
-  }
-}
+// The existing, working ₹399 Razorpay Payment Link. Buyers pay on Razorpay's
+// hosted page; access is granted only after server-side verification.
+const PAYMENT_LINK_URL = "https://rzp.io/rzp/DnSVNzC";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -40,29 +32,9 @@ export const Route = createFileRoute("/")({
   component: GuidePage,
 });
 
-function loadCheckoutScript(): Promise<boolean> {
-  if (typeof window === "undefined") return Promise.resolve(false);
-  if (window.Razorpay) return Promise.resolve(true);
-
-  return new Promise((resolve) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${CHECKOUT_SCRIPT}"]`,
-    );
-    const script = existing ?? document.createElement("script");
-    script.addEventListener("load", () => resolve(Boolean(window.Razorpay)), { once: true });
-    script.addEventListener("error", () => resolve(false), { once: true });
-    if (!existing) {
-      script.src = CHECKOUT_SCRIPT;
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  });
-}
-
 function GuidePage() {
   const navigate = useNavigate();
   const [state, setState] = useState<"checking" | "locked" | "unlocked">("checking");
-  const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const coverRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -125,7 +97,6 @@ function GuidePage() {
     }
 
     void check(params.get("welcome") === "1");
-    void loadCheckoutScript();
     return () => {
       cancelled = true;
     };
@@ -144,88 +115,6 @@ function GuidePage() {
     return () => window.clearInterval(timer);
   }, []);
 
-  async function startCheckout() {
-    setError(null);
-    setBusy(true);
-
-    try {
-      const ready = await loadCheckoutScript();
-      if (!ready || !window.Razorpay) {
-        setError("Payment window couldn't load. Check your connection and try again.");
-        setBusy(false);
-        return;
-      }
-
-      const orderResponse = await fetch("/api/payment/order", {
-        method: "POST",
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      if (!orderResponse.ok) {
-        // Fall back to the existing, working Payment Link. Access is still
-        // granted only after the verified payment_link.paid webhook.
-        window.location.href = PAYMENT_LINK_URL;
-        return;
-      }
-
-      const order = (await orderResponse.json()) as {
-        orderId: string;
-        amount: number;
-        currency: string;
-        keyId: string;
-      };
-
-      const checkout = new window.Razorpay({
-        key: order.keyId,
-        order_id: order.orderId,
-        amount: order.amount,
-        currency: order.currency,
-        name: "Skin Science with Kii",
-        description: "The Acne Starter Guide",
-        theme: { color: "#3e342d" },
-        modal: {
-          ondismiss: () => {
-            setBusy(false);
-            setError("Payment was cancelled. You can try again whenever you're ready.");
-          },
-        },
-        handler: async (response: Record<string, string>) => {
-          try {
-            const verifyResponse = await fetch("/api/payment/verify", {
-              method: "POST",
-              credentials: "same-origin",
-              cache: "no-store",
-              headers: { "content-type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response["razorpay_order_id"],
-                razorpay_payment_id: response["razorpay_payment_id"],
-                razorpay_signature: response["razorpay_signature"],
-              }),
-            });
-            const result = (await verifyResponse.json()) as { verified?: boolean };
-            if (!verifyResponse.ok || !result.verified) {
-              setBusy(false);
-              setError(
-                "We couldn't confirm that payment yet. If money left your account, tap the button again or contact us and we'll open your guide.",
-              );
-              return;
-            }
-            setState("unlocked");
-            void navigate({ to: "/guide" });
-          } catch {
-            setBusy(false);
-            setError("We couldn't confirm that payment. Please try again.");
-          }
-        },
-      });
-
-      checkout.open();
-    } catch {
-      setBusy(false);
-      setError("Something went wrong starting the payment. Please try again.");
-    }
-  }
-
   const card =
     state === "unlocked" ? (
       <div className="payment-gate">
@@ -237,12 +126,7 @@ function GuidePage() {
         </button>
       </div>
     ) : (
-      <PaymentCard
-        checking={state === "checking"}
-        busy={busy}
-        error={error}
-        onBuy={() => void startCheckout()}
-      />
+      <PaymentCard checking={state === "checking"} error={error} />
     );
 
   return (
@@ -255,26 +139,16 @@ function GuidePage() {
   );
 }
 
-function PaymentCard({
-  checking,
-  busy,
-  error,
-  onBuy,
-}: {
-  checking: boolean;
-  busy: boolean;
-  error: string | null;
-  onBuy: () => void;
-}) {
+function PaymentCard({ checking, error }: { checking: boolean; error: string | null }) {
   return (
     <div className="payment-gate">
       <div className="pay-kicker">skin science with kii</div>
       <p className="pay-title">Your full acne guide is waiting.</p>
       <p className="pay-copy">Unlock the complete Skin Science with Kii Acne Starter Guide.</p>
       <p className="price">₹399 • One-time payment</p>
-      <button className="pay-btn" type="button" onClick={onBuy} disabled={busy || checking}>
-        {busy ? "Opening payment…" : "Buy the Acne Guide — ₹399"}
-      </button>
+      <a className="pay-btn" href={PAYMENT_LINK_URL}>
+        Buy the Acne Guide — ₹399
+      </a>
 
       {error ? <p className="fine-print">{error}</p> : null}
       {checking ? <p className="fine-print">One moment…</p> : null}
