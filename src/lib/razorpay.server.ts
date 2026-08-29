@@ -10,8 +10,10 @@ const RAZORPAY_API = "https://api.razorpay.com/v1";
 export class RazorpayConfigError extends Error {}
 
 function credentials(): { keyId: string; keySecret: string } {
-  const keyId = process.env["RAZORPAY_KEY_ID"];
-  const keySecret = process.env["RAZORPAY_KEY_SECRET"];
+  // Read at call time (per-request env injection) and trim stray whitespace,
+  // which would otherwise silently break Basic authentication.
+  const keyId = process.env["RAZORPAY_KEY_ID"]?.trim();
+  const keySecret = process.env["RAZORPAY_KEY_SECRET"]?.trim();
   if (!keyId || !keySecret) {
     throw new RazorpayConfigError(
       "Razorpay is not configured: RAZORPAY_KEY_ID and/or RAZORPAY_KEY_SECRET are missing",
@@ -19,6 +21,7 @@ function credentials(): { keyId: string; keySecret: string } {
   }
   return { keyId, keySecret };
 }
+
 
 /** Public key id, safe to send to the browser (never the secret). */
 export function publicKeyId(): string {
@@ -80,8 +83,20 @@ export async function createOrder(): Promise<RazorpayOrder> {
         body?.error?.code ?? "unknown"
       } description=${body?.error?.description ?? "none"}`,
     );
+    if (status === 401 || status === 403) {
+      const { keyId, keySecret } = credentials();
+      // Shape-only diagnostics: never the values themselves.
+      console.error(
+        `[razorpay] credentials rejected by Razorpay (keyId prefix=${keyId.slice(
+          0,
+          8,
+        )}, keyId length=${keyId.length}, keySecret length=${keySecret.length}; a Razorpay Key Secret is normally ~24 characters)`,
+      );
+      throw new RazorpayConfigError("Razorpay rejected RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET");
+    }
     throw new Error("order_creation_failed");
   }
+
 
   return { id: body.id, amount: body.amount, currency: body.currency };
 }

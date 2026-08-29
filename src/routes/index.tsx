@@ -123,10 +123,15 @@ function GuidePage() {
         cache: "no-store",
       });
       if (!orderResponse.ok) {
-        setError("We couldn't start the payment just now. Please try again in a moment.");
+        setError(
+          orderResponse.status === 503
+            ? "Payments are temporarily unavailable. Please try again shortly."
+            : "We couldn't start the payment just now. Please try again in a moment.",
+        );
         setBusy(false);
         return;
       }
+
       const order = (await orderResponse.json()) as {
         orderId: string;
         amount: number;
