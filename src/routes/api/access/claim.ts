@@ -44,7 +44,7 @@ export const Route = createFileRoute("/api/access/claim")({
               return new Response(null, {
                 status: 302,
                 headers: {
-                  Location: "/?welcome=1",
+                  Location: "/guide",
                   "Set-Cookie": accessCookieHeader(paymentId),
                 },
               });
