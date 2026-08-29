@@ -7,7 +7,7 @@ export const ACCESS_COOKIE = "kii_guide_access";
 export const EXPECTED_AMOUNT_PAISE = 39900;
 
 /** The existing ₹399 Razorpay Payment Link (unchanged). */
-export const PAYMENT_LINK_ID = "plink_TVG4aXI7umB4mf";
+export const PAYMENT_LINK_ID = "plink_TVWpTNZeQCrjHU";
 
 function secret(): string {
   const value = process.env["GUIDE_ACCESS_SECRET"];

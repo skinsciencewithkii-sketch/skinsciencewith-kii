@@ -10,7 +10,7 @@ const CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
 // The existing, working ₹399 Razorpay Payment Link. Used as-is whenever
 // Checkout can't be started, so buyers always have a working payment path.
-const PAYMENT_LINK_URL = "https://rzp.io/rzp/DnSVNzC";
+const PAYMENT_LINK_URL = "https://rzp.io/rzp/sVszJ7B";
 
 declare global {
   interface Window {
