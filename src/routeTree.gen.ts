@@ -9,8 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuideRouteImport } from './routes/guide'
+import { Route as UnlockRouteImport } from './routes/unlock'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
 import { Route as ApiAccessGuideRouteImport } from './routes/api/access/guide'
 import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
@@ -18,14 +18,14 @@ import { Route as ApiPayOrderRouteImport } from './routes/api/pay/order'
 import { Route as ApiPayVerifyRouteImport } from './routes/api/pay/verify'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay/webhook'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnlockRoute = UnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
@@ -61,8 +61,8 @@ const ApiPublicRazorpayWebhookRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -71,8 +71,8 @@ export interface FileRoutesByFullPath {
   '/api/public/razorpay/webhook': typeof ApiPublicRazorpayWebhookRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -82,8 +82,8 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -94,8 +94,8 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -104,8 +104,8 @@ export interface FileRouteTypes {
     | '/api/public/razorpay/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -114,8 +114,8 @@ export interface FileRouteTypes {
     | '/api/public/razorpay/webhook'
   id:
     | '__root__'
-    | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -125,8 +125,8 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   GuideRoute: typeof GuideRoute
+  UnlockRoute: typeof UnlockRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
   ApiAccessGuideRoute: typeof ApiAccessGuideRoute
   ApiAccessStatusRoute: typeof ApiAccessStatusRoute
@@ -137,18 +137,18 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/guide': {
       id: '/guide'
       path: '/guide'
       fullPath: '/guide'
       preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unlock': {
+      id: '/unlock'
+      path: '/unlock'
+      fullPath: '/unlock'
+      preLoaderRoute: typeof UnlockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/access/claim': {
@@ -197,8 +197,8 @@ declare module '@tanstack/react-router' {
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   GuideRoute: GuideRoute,
+  UnlockRoute: UnlockRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
   ApiAccessGuideRoute: ApiAccessGuideRoute,
   ApiAccessStatusRoute: ApiAccessStatusRoute,
