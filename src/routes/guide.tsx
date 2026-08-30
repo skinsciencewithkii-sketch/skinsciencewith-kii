@@ -41,7 +41,7 @@ function GuidePage() {
         if (cancelled) return;
         if (!response.ok) {
           setStatus("denied");
-          void navigate({ to: "/" });
+          void navigate({ to: "/unlock" });
           return;
         }
         setHtml(await response.text());
@@ -72,7 +72,7 @@ function GuidePage() {
               : "Head back to the cover to unlock your copy."}
           </p>
           {status === "denied" ? (
-            <a className="pay-btn" href="/">
+            <a className="pay-btn" href="/unlock">
               Back to the cover
             </a>
           ) : null}
