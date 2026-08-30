@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as GuideRouteImport } from './routes/guide'
+import { Route as UnlockRouteImport } from './routes/unlock'
 import { Route as ApiAccessClaimRouteImport } from './routes/api/access/claim'
 import { Route as ApiAccessGuideRouteImport } from './routes/api/access/guide'
 import { Route as ApiAccessStatusRouteImport } from './routes/api/access/status'
@@ -26,6 +27,11 @@ const IndexRoute = IndexRouteImport.update({
 const GuideRoute = GuideRouteImport.update({
   id: '/guide',
   path: '/guide',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UnlockRoute = UnlockRouteImport.update({
+  id: '/unlock',
+  path: '/unlock',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAccessClaimRoute = ApiAccessClaimRouteImport.update({
@@ -63,6 +69,7 @@ const ApiPublicRazorpayWebhookRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/guide': typeof GuideRoute
+  '/unlock': typeof UnlockRoute
   '/api/access/claim': typeof ApiAccessClaimRoute
   '/api/access/guide': typeof ApiAccessGuideRoute
   '/api/access/status': typeof ApiAccessStatusRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/guide'
+    | '/unlock'
     | '/api/access/claim'
     | '/api/access/guide'
     | '/api/access/status'
@@ -127,6 +139,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   GuideRoute: typeof GuideRoute
+  UnlockRoute: typeof UnlockRoute
   ApiAccessClaimRoute: typeof ApiAccessClaimRoute
   ApiAccessGuideRoute: typeof ApiAccessGuideRoute
   ApiAccessStatusRoute: typeof ApiAccessStatusRoute
@@ -149,6 +162,13 @@ declare module '@tanstack/react-router' {
       path: '/guide'
       fullPath: '/guide'
       preLoaderRoute: typeof GuideRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/unlock': {
+      id: '/unlock'
+      path: '/unlock'
+      fullPath: '/unlock'
+      preLoaderRoute: typeof UnlockRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/access/claim': {
@@ -199,6 +219,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   GuideRoute: GuideRoute,
+  UnlockRoute: UnlockRoute,
   ApiAccessClaimRoute: ApiAccessClaimRoute,
   ApiAccessGuideRoute: ApiAccessGuideRoute,
   ApiAccessStatusRoute: ApiAccessStatusRoute,
