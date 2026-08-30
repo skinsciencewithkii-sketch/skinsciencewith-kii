@@ -34,7 +34,7 @@ function loadCheckoutScript(): Promise<void> {
   });
 }
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/unlock")({
   head: () => ({
     meta: [
       { title: "The Acne Starter Guide — Skin Science with Kii" },
