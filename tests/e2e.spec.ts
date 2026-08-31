@@ -47,17 +47,17 @@ test.describe("navigation and routing", () => {
     await expect(cta).toHaveAttribute("href", "/unlock");
   });
 
-  test("existing official homepage sections are all present and in order, with the Featured Guide after the subscribe/weekly-letters band", async ({
+  test("existing official homepage sections are all present and in order, with the Featured Guide immediately after the hero's subscriber-count stats", async ({
     page,
   }) => {
     await page.goto("/");
     const sectionSelectors = [
       ".hero",
+      "#acne-guide",
       "#about",
       "#pillars",
       "#letters",
       ".subscribe-band",
-      "#acne-guide",
     ];
     const order = await page.evaluate((selectors: string[]) => {
       const main = document.querySelector("main");
@@ -66,9 +66,10 @@ test.describe("navigation and routing", () => {
     }, sectionSelectors);
     // Every section exists (no -1)...
     for (const index of order) expect(index).toBeGreaterThanOrEqual(0);
-    // ...and appears in this exact relative order, so the Featured Guide
-    // (the only addition beyond the official reference site) comes last,
-    // after every pre-existing section including the subscribe band.
+    // ...and appears in this exact relative order: the Featured Guide sits
+    // right after the Hero (which contains the "267+ Lumières subscribed"
+    // stat), ahead of every other pre-existing section, per the brief's
+    // request to make it prominent immediately after the subscriber count.
     for (let i = 1; i < order.length; i++) {
       expect(order[i]!).toBeGreaterThan(order[i - 1]!);
     }
