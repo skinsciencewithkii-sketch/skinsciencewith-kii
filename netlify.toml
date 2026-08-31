@@ -5,3 +5,14 @@
 [build.environment]
   NODE_VERSION = "22"
   NITRO_PRESET = "netlify"
+  # SUPABASE_URL (server-side var) intentionally holds the same value as
+  # VITE_SUPABASE_URL (the public Supabase project URL, which Vite inlines
+  # into the browser bundle by design — required for the browser Supabase
+  # client to work at all, same as any Supabase app). Netlify's secrets
+  # scanner flags that value-match as "SUPABASE_URL exposed" even though a
+  # Supabase project URL isn't a credential — only SUPABASE_SERVICE_ROLE_KEY
+  # is. This omits SUPABASE_URL specifically from the scan; it does not
+  # disable scanning for the real secrets (SUPABASE_SERVICE_ROLE_KEY,
+  # RAZORPAY_KEY_SECRET, RAZORPAY_WEBHOOK_SECRET, GUIDE_ACCESS_SECRET),
+  # which must never appear in client output and are confirmed not to.
+  SECRETS_SCAN_OMIT_KEYS = "SUPABASE_URL"
