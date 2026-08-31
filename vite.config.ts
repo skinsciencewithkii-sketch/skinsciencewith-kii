@@ -7,6 +7,12 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 
 export default defineConfig({
+  // This project deploys to Netlify only. Pin the Nitro preset here (in
+  // version control) rather than relying solely on the NITRO_PRESET env var
+  // in netlify.toml — belt-and-suspenders against the build silently
+  // falling back to the cloudflare-module default (which writes to
+  // .output/ instead of dist/) if that env var is ever dropped.
+  nitro: { preset: "netlify" },
   tanstackStart: {
     // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
     // nitro/vite builds from this
