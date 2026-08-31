@@ -77,14 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Skin Science with Kii" },
+      {
+        name: "description",
+        content:
+          "Evidence-based dermatology, skincare, acne, pigmentation and hair health explained simply by Kii.",
+      },
+      { name: "author", content: "Skin Science with Kii" },
+      { property: "og:title", content: "Skin Science with Kii" },
+      {
+        property: "og:description",
+        content:
+          "Evidence-based dermatology, skincare, acne, pigmentation and hair health explained simply by Kii.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {

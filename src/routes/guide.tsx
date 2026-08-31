@@ -19,7 +19,14 @@ export const Route = createFileRoute("/guide")({
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "stylesheet", href: "/guide.css" }],
+    links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,500&family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap",
+      },
+      { rel: "stylesheet", href: "/guide.css" },
+    ],
   }),
   component: GuidePage,
 });
