@@ -10,16 +10,17 @@ const CHECKOUT_SCRIPT = "https://checkout.razorpay.com/v1/checkout.js";
 
 declare global {
   interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on?: (event: string, handler: (response: unknown) => void) => void;
+    };
   }
 }
 
 function loadCheckoutScript(): Promise<void> {
   if (window.Razorpay) return Promise.resolve();
   return new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${CHECKOUT_SCRIPT}"]`,
-    );
+    const existing = document.querySelector<HTMLScriptElement>(`script[src="${CHECKOUT_SCRIPT}"]`);
     if (existing) {
       existing.addEventListener("load", () => resolve());
       existing.addEventListener("error", () => reject(new Error("SCRIPT_FAILED")));
@@ -130,13 +131,7 @@ function CoverPage() {
   );
 }
 
-function PaymentCard({
-  checking,
-  onUnlocked,
-}: {
-  checking: boolean;
-  onUnlocked: () => void;
-}) {
+function PaymentCard({ checking, onUnlocked }: { checking: boolean; onUnlocked: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -163,6 +158,14 @@ function PaymentCard({
 
       const Checkout = window.Razorpay;
       if (!Checkout) throw new Error("SCRIPT_FAILED");
+
+      // Distinguishes an actual failed payment attempt (card declined, bank
+      // timeout, etc.) from the modal simply being dismissed, so the two
+      // don't get the same generic "cancelled" message. Razorpay fires
+      // payment.failed first, then still calls ondismiss once the user
+      // closes the modal — this flag stops ondismiss from overwriting the
+      // more specific message that's already showing.
+      let paymentFailed = false;
 
       const checkout = new Checkout({
         key: order.keyId,
@@ -201,10 +204,20 @@ function PaymentCard({
         modal: {
           ondismiss: () => {
             setBusy(false);
-            setError("Payment was cancelled. Your guide is still waiting.");
+            if (!paymentFailed) {
+              setError("Payment was cancelled. Your guide is still waiting.");
+            }
           },
         },
         theme: { color: "#c98b8b" },
+      });
+
+      checkout.on?.("payment.failed", () => {
+        paymentFailed = true;
+        setBusy(false);
+        setError(
+          "That payment didn't go through. No charge was made — please try again or use a different payment method.",
+        );
       });
 
       checkout.open();

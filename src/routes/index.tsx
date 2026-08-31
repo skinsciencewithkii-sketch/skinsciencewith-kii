@@ -135,7 +135,6 @@ function GuidePopup() {
       document.body.style.overflow = previousOverflow;
       previouslyFocused.current?.focus();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   if (!open) return null;
@@ -166,8 +165,8 @@ function GuidePopup() {
           <span className="guide-popup-label">New guide</span>
           <h2 id="guide-popup-title">The Acne Starter Guide</h2>
           <p id="guide-popup-desc">
-            A simple, evidence-based guide to understanding your acne — what is actually
-            happening, what matters, and how to stop falling into the skincare rabbit hole.
+            A simple, evidence-based guide to understanding your acne — what is actually happening,
+            what matters, and how to stop falling into the skincare rabbit hole.
           </p>
           <div className="guide-popup-actions">
             <button type="button" className="btn" onClick={goToGuide}>
