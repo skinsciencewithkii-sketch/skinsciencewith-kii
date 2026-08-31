@@ -160,17 +160,20 @@ function GuidePopup() {
         </button>
         {coverSrc ? (
           <img className="guide-popup-cover" src={coverSrc} alt="The Acne Starter Guide cover" />
-        ) : null}
-        <div>
-          <span className="guide-popup-label">New guide</span>
+        ) : (
+          <div className="guide-popup-cover" style={{ background: "var(--blush)" }} />
+        )}
+        <div className="guide-popup-body">
+          <span className="guide-popup-label">New from Skin Science with Kii</span>
           <h2 id="guide-popup-title">The Acne Starter Guide</h2>
           <p id="guide-popup-desc">
-            A simple, evidence-based guide to understanding your acne — what is actually happening,
+            A simple, evidence-based guide to understanding your skin — what is actually happening,
             what matters, and how to stop falling into the skincare rabbit hole.
           </p>
+          <p className="guide-popup-price">₹399</p>
           <div className="guide-popup-actions">
             <button type="button" className="btn" onClick={goToGuide}>
-              Go to the guide
+              Explore the guide
             </button>
             <button type="button" className="guide-popup-later" onClick={dismiss}>
               Maybe later

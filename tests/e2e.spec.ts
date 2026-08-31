@@ -43,8 +43,42 @@ test.describe("navigation and routing", () => {
     await page.goto("/");
     const cover = page.locator(".featured-guide-card .fg-cover");
     await expect(cover).toHaveAttribute("href", "/unlock");
-    const cta = page.locator(".featured-guide-card >> text=View the Guide");
+    const cta = page.locator(".featured-guide-card >> text=View & unlock");
     await expect(cta).toHaveAttribute("href", "/unlock");
+  });
+
+  test("existing official homepage sections are all present and in order, with the Featured Guide after the subscribe/weekly-letters band", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const sectionSelectors = [
+      ".hero",
+      "#about",
+      "#pillars",
+      "#letters",
+      ".subscribe-band",
+      "#acne-guide",
+    ];
+    const order = await page.evaluate((selectors: string[]) => {
+      const main = document.querySelector("main");
+      const sections = Array.from(main?.querySelectorAll("section") ?? []);
+      return selectors.map((sel) => sections.findIndex((section) => section.matches(sel)));
+    }, sectionSelectors);
+    // Every section exists (no -1)...
+    for (const index of order) expect(index).toBeGreaterThanOrEqual(0);
+    // ...and appears in this exact relative order, so the Featured Guide
+    // (the only addition beyond the official reference site) comes last,
+    // after every pre-existing section including the subscribe band.
+    for (let i = 1; i < order.length; i++) {
+      expect(order[i]!).toBeGreaterThan(order[i - 1]!);
+    }
+  });
+
+  test("nav still links to the pre-existing official sections", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator('.nav-links a[href="#about"]')).toHaveText("About Kii");
+    await expect(page.locator('.nav-links a[href="#pillars"]')).toHaveText("Approach");
+    await expect(page.locator('.nav-links a[href="#letters"]')).toHaveCount(1);
   });
 
   test("/unlock has exactly one h1 with the guide title", async ({ page }) => {
@@ -143,9 +177,10 @@ test.describe("new-guide popup", () => {
     const dialog = await openPopup(page);
     await expect(dialog).toBeVisible();
     await expect(dialog).toHaveAttribute("aria-modal", "true");
-    await expect(dialog.getByText("New guide")).toBeVisible();
+    await expect(dialog.getByText("New from Skin Science with Kii")).toBeVisible();
     await expect(dialog.getByRole("heading", { name: "The Acne Starter Guide" })).toBeVisible();
-    await expect(dialog.getByRole("button", { name: "Go to the guide" })).toBeVisible();
+    await expect(dialog.getByText("₹399")).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Explore the guide" })).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Maybe later" })).toBeVisible();
     await expect(dialog.getByRole("button", { name: "Close" })).toBeVisible();
   });
@@ -174,9 +209,9 @@ test.describe("new-guide popup", () => {
     await expect(dialog).toHaveCount(0);
   });
 
-  test('"Go to the guide" navigates to /unlock', async ({ page }) => {
+  test('"Explore the guide" navigates to /unlock', async ({ page }) => {
     const dialog = await openPopup(page);
-    await dialog.getByRole("button", { name: "Go to the guide" }).click();
+    await dialog.getByRole("button", { name: "Explore the guide" }).click();
     await page.waitForURL("**/unlock");
   });
 
